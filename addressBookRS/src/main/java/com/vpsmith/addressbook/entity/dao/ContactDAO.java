@@ -17,10 +17,9 @@ public class ContactDAO {
 	public List<Contact> findByUser(String username) {
 
 		EntityManager entitymanager = EntityManagerFactoryHelper.createEntityManager();
-		entitymanager.getTransaction().begin();
 
 		TypedQuery<Contact> query = entitymanager.createNamedQuery("Contact.findByUsername", Contact.class);
-		query.setParameter("username", "user");
+		query.setParameter("username", username);
 		List<Contact> contacts = query.getResultList();
 
 		return contacts;
@@ -29,7 +28,6 @@ public class ContactDAO {
 	public Contact findById(Integer id) {
 
 		EntityManager entitymanager = EntityManagerFactoryHelper.createEntityManager();
-		entitymanager.getTransaction().begin();
 
 		TypedQuery<Contact> query = entitymanager.createNamedQuery("Contact.findById", Contact.class);
 		query.setParameter("id", id);
@@ -47,7 +45,6 @@ public class ContactDAO {
 	public List<Contact> findAll() {
 
 		EntityManager entitymanager = EntityManagerFactoryHelper.createEntityManager();
-		entitymanager.getTransaction().begin();
 
 		TypedQuery<Contact> query = entitymanager.createNamedQuery("Contact.findAll", Contact.class);
 		List<Contact> contacts = query.getResultList();
@@ -55,20 +52,43 @@ public class ContactDAO {
 		return contacts;
 	}
 
-//	public Contact save(Contact contact) {
-//		EntityManager entitymanager = EntityManagerFactoryHelper.createEntityManager();
-//		entitymanager.getTransaction().begin();
-//
-//		TypedQuery<Contact> query = entitymanager.createNamedQuery("Contact.findById", Contact.class);
-//		query.setParameter("username", "user");
-//		List<Contact> contacts = query.getResultList();
-//
-//		return contacts;
-//	}
-
-	public void remove(int Id) {
+	public Contact save(Contact contact) {
 
 		EntityManager entitymanager = EntityManagerFactoryHelper.createEntityManager();
+		entitymanager.getTransaction().begin();
+
+		entitymanager.persist(contact);
+
+		entitymanager.getTransaction().commit();
+
+		return contact;
+	}
+
+	public void update(Contact contact) {
+
+		EntityManager entitymanager = EntityManagerFactoryHelper.createEntityManager();
+
+		
+		entitymanager.getTransaction().begin();
+		
+		Contact aContact = findById(contact.getId());
+		
+		aContact.setEmail(contact.getEmail());
+		aContact.setFirstName(contact.getFirstName());
+		aContact.setLastName(contact.getLastName());
+		aContact.setPassword(contact.getPassword());
+		aContact.setPhone(contact.getPhone());
+		
+		entitymanager.merge(aContact);
+
+		entitymanager.getTransaction().commit();
+	}
+
+	public void remove(Integer Id) {
+
+		EntityManager entitymanager = EntityManagerFactoryHelper.createEntityManager();
+
+		entitymanager.getTransaction().begin();
 		CriteriaBuilder cb = entitymanager.getCriteriaBuilder();
 
 		// create delete
@@ -82,8 +102,8 @@ public class ContactDAO {
 
 		// perform update
 		entitymanager.createQuery(delete).executeUpdate();
-		entitymanager.flush();
-		entitymanager.close();
+
+		entitymanager.getTransaction().commit();
 
 	}
 

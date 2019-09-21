@@ -20,7 +20,6 @@ public class EntityManagerFactoryHelper implements ServletContextListener, Servl
 
 		ServletRequestListener.super.requestDestroyed(sre);
 		if (EntityManagerFactoryHelper.entityManager != null) {
-			EntityManagerFactoryHelper.entityManager.flush();
 			EntityManagerFactoryHelper.entityManager.close();
 			System.out.println("Destroyed em");
 		}
