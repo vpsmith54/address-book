@@ -13,14 +13,15 @@ import javax.servlet.annotation.WebListener;
 public class EntityManagerFactoryHelper implements ServletContextListener, ServletRequestListener {
 
 	private static EntityManagerFactory entityManagerFactory;
-	private static EntityManager entityManager;
 
 	@Override
 	public void requestDestroyed(ServletRequestEvent sre) {
 
 		ServletRequestListener.super.requestDestroyed(sre);
-		if (EntityManagerFactoryHelper.entityManager != null) {
-			EntityManagerFactoryHelper.entityManager.close();
+		if ((sre.getServletRequest() != null) && (sre.getServletRequest().getAttribute("entity") != null)) {
+			EntityManager em = (EntityManager) sre.getServletRequest().getAttribute("entity");
+			sre.getServletRequest().removeAttribute("entity");
+			em.close();
 			System.out.println("Destroyed em");
 		}
 	}
@@ -29,6 +30,8 @@ public class EntityManagerFactoryHelper implements ServletContextListener, Servl
 	public void requestInitialized(ServletRequestEvent sre) {
 		// TODO Auto-generated method stub
 		ServletRequestListener.super.requestInitialized(sre);
+		sre.getServletRequest().setAttribute("entity", entityManagerFactory.createEntityManager());
+		System.out.println("Created em");
 	}
 
 	@Override
@@ -39,18 +42,6 @@ public class EntityManagerFactoryHelper implements ServletContextListener, Servl
 	@Override
 	public void contextDestroyed(ServletContextEvent event) {
 		entityManagerFactory.close();
-	}
-
-	public static synchronized EntityManager createEntityManager() {
-
-		if (entityManagerFactory == null) {
-			throw new IllegalStateException("Context is not initialized yet.");
-		}
-
-		entityManager = entityManagerFactory.createEntityManager();
-		System.out.println("caching em");
-
-		return entityManager;
 	}
 
 }

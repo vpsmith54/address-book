@@ -2,6 +2,8 @@ package com.vpsmith.addressbook.service;
 
 import java.util.List;
 
+import javax.persistence.EntityManager;
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -9,6 +11,7 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -22,6 +25,9 @@ import com.vpsmith.addressbook.entity.dao.ContactDAO;
 @Path("contacts")
 public class ContactResource {
 
+	@Context
+	private HttpServletRequest httpServletRequest;
+
 	/**
 	 * Method handling HTTP GET requests. The returned object will be sent to the
 	 * client as "text/plain" media type.
@@ -32,7 +38,7 @@ public class ContactResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getContacts() {
 
-		ContactDAO dao = new ContactDAO();
+		ContactDAO dao = getDAO();
 		List<Contact> contacts = dao.findAll();
 
 		if ((contacts == null) || (contacts.isEmpty())) {
@@ -58,7 +64,7 @@ public class ContactResource {
 
 		System.out.println("got here");
 
-		ContactDAO dao = new ContactDAO();
+		ContactDAO dao = getDAO();
 		Contact contact = dao.findById(id);
 		if (contact == null) {
 			return Response.status(Response.Status.NOT_FOUND).build();
@@ -80,7 +86,7 @@ public class ContactResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getContactByUser(@PathParam("user") String userName) {
 
-		ContactDAO dao = new ContactDAO();
+		ContactDAO dao = getDAO();
 		List<Contact> contacts = dao.findByUser(userName);
 
 		if ((contacts == null) || (contacts.isEmpty())) {
@@ -104,7 +110,7 @@ public class ContactResource {
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response save(Contact contact) {
 
-		ContactDAO dao = new ContactDAO();
+		ContactDAO dao = getDAO();
 		Contact aContact = dao.save(contact);
 		System.out.println("the contact: " + aContact);
 
@@ -116,7 +122,7 @@ public class ContactResource {
 
 		return Response.status(Response.Status.CREATED).entity(myEntity).build();
 	}
-	
+
 	/**
 	 * Method handling HTTP GET requests. The returned object will be sent to the
 	 * client as "text/plain" media type.
@@ -127,11 +133,15 @@ public class ContactResource {
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response update(Contact contact) {
 
-		ContactDAO dao = new ContactDAO();
+		ContactDAO dao = getDAO();
 		dao.update(contact);
 		System.out.println("the contact: " + contact);
 
 		return Response.status(Response.Status.OK).build();
+	}
+
+	private ContactDAO getDAO() {
+		return new ContactDAO((EntityManager) httpServletRequest.getAttribute("entity"));
 	}
 
 }

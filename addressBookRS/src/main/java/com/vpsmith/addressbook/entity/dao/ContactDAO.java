@@ -10,13 +10,17 @@ import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Root;
 
 import com.vpsmith.addressbook.entity.Contact;
-import com.vpsmith.addressbook.service.EntityManagerFactoryHelper;
 
 public class ContactDAO {
 
-	public List<Contact> findByUser(String username) {
+	private EntityManager entitymanager;
 
-		EntityManager entitymanager = EntityManagerFactoryHelper.createEntityManager();
+	public ContactDAO(EntityManager entitymanager) {
+		super();
+		this.entitymanager = entitymanager;
+	}
+
+	public List<Contact> findByUser(String username) {
 
 		TypedQuery<Contact> query = entitymanager.createNamedQuery("Contact.findByUsername", Contact.class);
 		query.setParameter("username", username);
@@ -26,8 +30,6 @@ public class ContactDAO {
 	}
 
 	public Contact findById(Integer id) {
-
-		EntityManager entitymanager = EntityManagerFactoryHelper.createEntityManager();
 
 		TypedQuery<Contact> query = entitymanager.createNamedQuery("Contact.findById", Contact.class);
 		query.setParameter("id", id);
@@ -44,8 +46,6 @@ public class ContactDAO {
 
 	public List<Contact> findAll() {
 
-		EntityManager entitymanager = EntityManagerFactoryHelper.createEntityManager();
-
 		TypedQuery<Contact> query = entitymanager.createNamedQuery("Contact.findAll", Contact.class);
 		List<Contact> contacts = query.getResultList();
 
@@ -54,7 +54,6 @@ public class ContactDAO {
 
 	public Contact save(Contact contact) {
 
-		EntityManager entitymanager = EntityManagerFactoryHelper.createEntityManager();
 		entitymanager.getTransaction().begin();
 
 		entitymanager.persist(contact);
@@ -66,27 +65,22 @@ public class ContactDAO {
 
 	public void update(Contact contact) {
 
-		EntityManager entitymanager = EntityManagerFactoryHelper.createEntityManager();
-
-		
 		entitymanager.getTransaction().begin();
-		
+
 		Contact aContact = findById(contact.getId());
-		
+
 		aContact.setEmail(contact.getEmail());
 		aContact.setFirstName(contact.getFirstName());
 		aContact.setLastName(contact.getLastName());
 		aContact.setPassword(contact.getPassword());
 		aContact.setPhone(contact.getPhone());
-		
+
 		entitymanager.merge(aContact);
 
 		entitymanager.getTransaction().commit();
 	}
 
 	public void remove(Integer Id) {
-
-		EntityManager entitymanager = EntityManagerFactoryHelper.createEntityManager();
 
 		entitymanager.getTransaction().begin();
 		CriteriaBuilder cb = entitymanager.getCriteriaBuilder();
